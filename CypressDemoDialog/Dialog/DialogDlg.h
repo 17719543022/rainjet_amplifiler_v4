@@ -102,7 +102,8 @@ private:
 	bool m_bButtonADCSampleClicked;
 	bool m_bButtonImpedanceClicked;
 	UINT m_uDlNum;
-	CChartCtrl m_chartCtrl;
+	CChartCtrl m_ChartCtrl;
+	CChartLineSerie* pLineSeries;
 	UINT m_AxisMin;
 	UINT m_AxisMax;
 	CComboBox m_PortNr;

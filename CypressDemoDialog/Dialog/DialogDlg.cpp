@@ -59,7 +59,9 @@ END_MESSAGE_MAP()
 #define IDTIMER2 2
 
 unsigned short g_xBuff[DATA_SHOW_LENGTH] = { 0 };
-unsigned short g_yBuff[DATA_SHOW_LENGTH] = { 0 };
+long g_yBuff[DATA_SHOW_LENGTH] = { 0 };
+double XValues[DATA_SHOW_LENGTH] = { 0 };
+double YValues[DATA_SHOW_LENGTH] = { 0 };
 UCHAR g_buffersTrigResult[DATA_PAGE_LENGTH] = { 0 };
 bool g_bKInstructionSend = FALSE;
 int g_daoLianIndex = 16;
@@ -243,7 +245,7 @@ void CDialogDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_DEVICES, m_comboDevices);
 	DDX_Control(pDX, IDC_BUTTON_VERSION, m_buttonVersion);
 	DDX_Control(pDX, IDC_BUTTON_ADC_SAMPLE, m_buttonADCSample);
-	DDX_Control(pDX, IDC_CUSTOM_SHOW, m_chartCtrl);
+	DDX_Control(pDX, IDC_CUSTOM_SHOW, m_ChartCtrl);
 	DDX_Control(pDX, IDC_BUTTON_DL_NUM, m_buttonDlNum);
 	DDX_Control(pDX, IDC_BUTTON_SAMPLE_FREQ, m_buttonSampleFreq);
 	DDX_Control(pDX, IDC_BUTTON_SET_SAMPLE_FREQ, m_buttonSetSampleFreq);
@@ -278,10 +280,6 @@ BEGIN_MESSAGE_MAP(CDialogDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_MAX_FREQ, &CDialogDlg::OnBnClickedButtonMaxFreq)
 	ON_BN_CLICKED(IDC_BUTTON_TRIGGER, &CDialogDlg::OnBnClickedButtonTrigger)
 	ON_BN_CLICKED(IDC_BUTTON_IMPEDANCE, &CDialogDlg::OnBnClickedButtonImpedance)
-	ON_BN_CLICKED(IDC_BUTTON_MAX_INC, &CDialogDlg::OnBnClickedButtonMaxInc)
-	ON_BN_CLICKED(IDC_BUTTON_MAX_DEC, &CDialogDlg::OnBnClickedButtonMaxDec)
-	ON_BN_CLICKED(IDC_BUTTON_MIN_INC, &CDialogDlg::OnBnClickedButtonMinInc)
-	ON_BN_CLICKED(IDC_BUTTON_MIN_DEC, &CDialogDlg::OnBnClickedButtonMinDec)
 	ON_BN_CLICKED(IDC_BUTTON_SEND, &CDialogDlg::OnBnClickedButtonSend)
 	ON_BN_CLICKED(IDC_BUTTON_UART_TRIG, &CDialogDlg::OnBnClickedButtonUartTrig)
 END_MESSAGE_MAP()
@@ -318,6 +316,20 @@ BOOL CDialogDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	CChartStandardAxis* pBottomAxis =
+		m_ChartCtrl.CreateStandardAxis(CChartCtrl::BottomAxis);
+	pBottomAxis->SetMinMax(0, DATA_SHOW_LENGTH);
+	CChartStandardAxis* pLeftAxis =
+		m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
+	pLeftAxis->SetMinMax(-1000, 1000);
+	//CChartStandardAxis* pTopAxis =
+	//	m_ChartCtrl.CreateStandardAxis(CChartCtrl::TopAxis);
+	//pTopAxis->SetMinMax(0, DATA_SHOW_LENGTH);
+	//CChartStandardAxis* pRightAxis =
+	//	m_ChartCtrl.CreateStandardAxis(CChartCtrl::RightAxis);
+	//pRightAxis->SetMinMax(-1000, 1000);
+	pLineSeries = m_ChartCtrl.CreateLineSerie(false, false);
+
 	m_selectedUSBDevice = new CCyUSBDevice(this->m_hWnd, CYUSBDRV_GUID, true);
 	this->m_buttonADCSample.EnableWindow(FALSE);
 	this->m_buttonUSBTrig.EnableWindow(FALSE);
@@ -1175,8 +1187,11 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 				g_bButtonUARTTrigClicked = FALSE;
 			}
 
-			g_yBuff[g_writeIndex] = buffersInput[nCount][g_daoLianIndex] << 8;
-			g_yBuff[g_writeIndex] += buffersInput[nCount][g_daoLianIndex + 1];
+			g_yBuff[g_writeIndex] = buffersInput[nCount][g_daoLianIndex] << 20;
+			g_yBuff[g_writeIndex] += buffersInput[nCount][g_daoLianIndex + 1] << 12;
+			g_yBuff[g_writeIndex] += buffersInput[nCount][g_daoLianIndex + 2] << 4;
+			g_yBuff[g_writeIndex] += buffersInput[nCount][g_daoLianIndex + 3] >> 4;
+			g_yBuff[g_writeIndex] -= 0x8000000;
 
 			g_writeIndex = (g_writeIndex + 1) % DATA_SHOW_LENGTH;
 
@@ -1242,14 +1257,40 @@ void CDialogDlg::OnTimer(UINT_PTR nIDEvent)
 	{
 	case IDTIMER1:
 	{
-		m_chartCtrl.EnableRefresh(FALSE);
-		CChartLineSerie* pLineSerie;
-		m_chartCtrl.RemoveAllSeries();
-		pLineSerie = m_chartCtrl.CreateLineSerie();
-		pLineSerie->SetSeriesOrdering(poNoOrdering);
-		pLineSerie->AddPoints(g_xBuff, g_yBuff, DATA_SHOW_LENGTH);
-		UpdateWindow();
-		m_chartCtrl.EnableRefresh(TRUE);
+		/* void CChartDemoDlg::OnAddseries() */
+		pLineSeries->SetWidth(1);
+		pLineSeries->SetPenStyle(0);
+		pLineSeries->SetName(_T("波形"));
+		pLineSeries->SetColor(255); //red
+		for (int i = 0; i < DATA_SHOW_LENGTH; i++)
+		{
+			YValues[i] = (((g_yBuff[i] * 2500.0) / pow(2, 27)) / 3.889);
+		}
+		pLineSeries->SetPoints(XValues, YValues, DATA_SHOW_LENGTH);
+
+		/* void CChartDemoDlg::OnAxisAutomaticCheck() */
+		CChartAxis* pAxis = m_ChartCtrl.GetLeftAxis();
+
+		double MinVal = YValues[0], MaxVal = YValues[0];
+		for (int i = 0; i < DATA_SHOW_LENGTH; i++)
+		{
+			if (YValues[i] < MinVal)
+			{
+				MinVal = YValues[i];
+			}
+		}
+		for (int i = 0; i < DATA_SHOW_LENGTH; i++)
+		{
+			if (YValues[i] > MaxVal)
+			{
+				MaxVal = YValues[i];
+			}
+		}
+
+		pAxis->SetAutomatic(false);
+		pAxis->SetMinMax(MinVal - (MaxVal - MinVal) / 10, MaxVal + (MaxVal - MinVal) / 10);
+
+		m_ChartCtrl.RefreshCtrl();
 
 		break;
 	}
@@ -1273,34 +1314,15 @@ void CDialogDlg::DataBuffInit()
 	for (int i = 0; i < DATA_SHOW_LENGTH; i++)
 	{
 		g_xBuff[i] = i + 1;
+
+		XValues[i] = i + 1;
 	}
 }
 
 // 初始化画图界面窗口
 void CDialogDlg::ChartCtrlInit()
 {
-	// TODO: 在此处添加实现代码.
-	//手动创建显示窗口
-	//CRect rect, rectChart;
-	//GetDlgItem(IDC_CUSTOM_SHOW)->GetWindowRect(&rect);
-	//ScreenToClient(rect);
-	//rectChart = rect;
-	//rectChart.top = rect.bottom + 3;
-	//rectChart.bottom = rectChart.top + rect.Height();
-	//m_ChartCtrl2.Create(this, rectChart, IDC_CUSTOM_SHOW2);
-	//m_ChartCtrl2.ShowWindow(SW_SHOWNORMAL);
-	///////////////////////显示主题/////////////////////////////
-	m_chartCtrl.GetTitle()->RemoveAll();
-	m_chartCtrl.GetTitle()->AddString(_T("波形"));
-	///////////////////////创建坐标xy标识/////////////////////////////
-	//m_ChartCtrl.GetBottomAxis()->GetLabel()->SetText(_T("强度"));
-	//m_ChartCtrl.GetLeftAxis()->GetLabel()->SetText(_T("采样点"));
-	///////////////////////创建坐标显示范围/////////////////////////////
-	CChartAxis* pAxis = NULL;
-	pAxis = m_chartCtrl.CreateStandardAxis(CChartCtrl::BottomAxis);
-	pAxis->SetMinMax(1, DATA_SHOW_LENGTH);
-	pAxis = m_chartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
-	pAxis->SetMinMax(m_AxisMin, m_AxisMax);
+
 }
 
 void CDialogDlg::DoQuery(UINT pos)
@@ -1683,39 +1705,6 @@ void CDialogDlg::OnBnClickedButtonImpedance()
 		m_bButtonImpedanceClicked = TRUE;
 	}
 }
-
-void CDialogDlg::OnBnClickedButtonMaxInc()
-{
-	m_AxisMax = m_AxisMax + 100;
-
-	m_chartCtrl.GetLeftAxis()->SetMinMax(m_AxisMin, m_AxisMax);
-	m_chartCtrl.RefreshCtrl();
-}
-
-void CDialogDlg::OnBnClickedButtonMaxDec()
-{
-	m_AxisMax = m_AxisMax - 100;
-
-	m_chartCtrl.GetLeftAxis()->SetMinMax(m_AxisMin, m_AxisMax);
-	m_chartCtrl.RefreshCtrl();
-}
-
-void CDialogDlg::OnBnClickedButtonMinInc()
-{
-	m_AxisMin = m_AxisMin + 100;
-
-	m_chartCtrl.GetLeftAxis()->SetMinMax(m_AxisMin, m_AxisMax);
-	m_chartCtrl.RefreshCtrl();
-}
-
-void CDialogDlg::OnBnClickedButtonMinDec()
-{
-	m_AxisMin = m_AxisMin - 100;
-
-	m_chartCtrl.GetLeftAxis()->SetMinMax(m_AxisMin, m_AxisMax);
-	m_chartCtrl.RefreshCtrl();
-}
-
 
 void CDialogDlg::OnBnClickedButtonSend()
 {

@@ -74,18 +74,6 @@ public:
 	void AddPoint(double X, double Y);
 	//! Adds an array of points to the series.
 	/**
-	Points which were already present in the series are kept.
-	@param pX
-	Array of X values for the points
-	@param pY
-	Array of Y values for the points
-	@param Count
-	Size of each of both arrays (number of points to add)
-	**/
-	void AddPoints(PWORD pX, PWORD pY, unsigned Count);
-
-	//! Adds an array of points to the series.
-	/**
 		Points which were already present in the series are kept.
 		@param pX
 			Array of X values for the points
