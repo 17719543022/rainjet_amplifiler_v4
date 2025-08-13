@@ -1047,15 +1047,8 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 	PUCHAR* contextsInput = new PUCHAR[QUEUE_SIZE];
 	OVERLAPPED		inOvLap[MAX_QUEUE_SZ];
 
-	long nCounter = 0;
-
 	while (pThis->m_bButtonADCSampleClicked == TRUE)
 	{
-		nCounter = nCounter + 1;
-		CString strMsg1;
-		strMsg1.Format("%d", nCounter);
-		pThis->m_edtTriggerValue.SetWindowText(strMsg1);
-
 		// Allocate all the buffers for the queues
 		for (int nCount = 0; nCount < QUEUE_SIZE; nCount++)
 		{
@@ -1783,6 +1776,8 @@ void CDialogDlg::onReadEvent(const char* portName, unsigned int readBufferLen)
 
 bool CDialogDlg::SurveyExistingComm()
 {
+	m_PortNr.ResetContent();
+
 	//获取串口号
 	std::vector<SerialPortInfo> m_portsList = CSerialPortInfo::availablePortInfos();
 	for (size_t i = 0; i < m_portsList.size(); i++)

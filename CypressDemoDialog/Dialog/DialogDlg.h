@@ -55,10 +55,6 @@ public:
 	afx_msg void OnBnClickedButtonTrigLength();
 	afx_msg void OnBnClickedButtonMaxFreq();
 	afx_msg void OnBnClickedButtonImpedance();
-	afx_msg void OnBnClickedButtonMaxInc();
-	afx_msg void OnBnClickedButtonMaxDec();
-	afx_msg void OnBnClickedButtonMinInc();
-	afx_msg void OnBnClickedButtonMinDec();
 	afx_msg void OnBnClickedButtonSend();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 private:
