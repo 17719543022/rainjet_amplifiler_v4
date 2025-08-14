@@ -9,7 +9,6 @@ module iic_eeprom #(
     output                  i2c_write_sync,
     input  [ 7:0]           i2c_byte_in,
     output                  scl_t,
-    //output reg              sda_t,
     input                   sda_i,
     output reg              sda_o,
     output reg              sda_t_z,

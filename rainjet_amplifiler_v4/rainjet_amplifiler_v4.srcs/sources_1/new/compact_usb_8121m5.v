@@ -840,7 +840,6 @@ iic_eeprom #(
     .i2c_write_sync                 (i2c_write_sync         ),
     .i2c_byte_in                    (i2c_byte_in            ),
     .scl_t                          (scl                    ),
-    //.sda_t                          (sda_t                  ),
     .sda_i                          (sda_i                  ),
     .sda_o                          (sda_o                  ),
     .sda_t_z                        (sda_t_z                ),
