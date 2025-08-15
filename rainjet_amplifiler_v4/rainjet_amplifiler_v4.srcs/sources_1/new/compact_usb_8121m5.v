@@ -59,6 +59,9 @@ module compact_usb_8121m5 (
     //IIC
     output              scl,
     inout               sda,
+    
+    input               supply_key,
+    output              supply_out,
 
     output              jl_com1_cs_out,
     output              jl_com1_sck_out,
@@ -824,10 +827,10 @@ uart_business uart_business_u0 (
     .uart_trig_data                 (uart_trig_data         )
 );
 
-wire                    sda_t_z;
-wire                    sda_o;
-assign sda = sda_t_z ? 1'bz : sda_o;
-wire                    sda_i = sda;
+wire                    sda_z;
+wire                    sda_out;
+assign sda = sda_z ? 1'bz : sda_out;
+wire                    sda_in = sda;
 
 iic_eeprom #(
     .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          ),
@@ -839,14 +842,21 @@ iic_eeprom #(
     .i2c_write_trigger              (i2c_write_trigger      ),
     .i2c_write_sync                 (i2c_write_sync         ),
     .i2c_byte_in                    (i2c_byte_in            ),
-    .scl_t                          (scl                    ),
-    .sda_i                          (sda_i                  ),
-    .sda_o                          (sda_o                  ),
-    .sda_t_z                        (sda_t_z                ),
+    .scl                            (scl                    ),
+    .sda_in                         (sda_in                 ),
+    .sda_out                        (sda_out                ),
+    .sda_z                          (sda_z                  ),
     .i2c_byte_out_en                (i2c_byte_out_en        ),
     .i2c_byte_out                   (i2c_byte_out           )
 );
 
+supply_ctrl #(
+    .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          )
+    ) supply_ctrl_inst (
+    .clk                            (clk                    ),
+    .supply_key                     (supply_key             ),
+    .supply_out                     (supply_out             )
+);
 
 
 endmodule

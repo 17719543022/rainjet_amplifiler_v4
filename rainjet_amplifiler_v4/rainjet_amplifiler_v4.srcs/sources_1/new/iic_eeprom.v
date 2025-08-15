@@ -8,10 +8,10 @@ module iic_eeprom #(
     input                   i2c_write_trigger,
     output                  i2c_write_sync,
     input  [ 7:0]           i2c_byte_in,
-    output                  scl_t,
-    input                   sda_i,
-    output reg              sda_o,
-    output reg              sda_t_z,
+    output                  scl,
+    input                   sda_in,
+    output reg              sda_out,
+    output reg              sda_z,
     output reg              i2c_byte_out_en,
     output reg [ 7:0]       i2c_byte_out
 );
@@ -134,7 +134,7 @@ begin
         sequential_read_counter <= 8'd0;
         i2c_clk_byte_out <= 8'd0;
         i2c_clk_write_sync <= 1'b0;
-        sda_o <= 1'b1; sda_t_z <= 1'b0;
+        sda_out <= 1'b1; sda_z <= 1'b0;
         scl_enable <= 1'b0;
         i2c_bit_counter <= 4'd0;
         i2c_clk_byte_en <= 1'b0;
@@ -164,7 +164,7 @@ begin
                         next_state <= STATE_CONTROL_BYTE_W;
                         i2c_bit_counter <= 4'd0;
                         scl_enable <= 1'b1;
-                        sda_o <= 1'b0; sda_t_z <= 1'b0;
+                        sda_out <= 1'b0; sda_z <= 1'b0;
                     end
                     else
                     begin
@@ -182,7 +182,7 @@ begin
                     begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                     end
-                    sda_o <= CONTROL_BYTE_W[7 - i2c_bit_counter]; sda_t_z <= 1'b0;
+                    sda_out <= CONTROL_BYTE_W[7 - i2c_bit_counter]; sda_z <= 1'b0;
                 end
             end
             STATE_ACK0:
@@ -191,7 +191,7 @@ begin
                 begin
                     next_state <= STATE_ADD1;
                     i2c_bit_counter <= 4'd0;
-                    sda_t_z <= 1'b1;
+                    sda_z <= 1'b1;
                 end
             end
             STATE_ADD1:
@@ -206,7 +206,7 @@ begin
                     begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                     end
-                    sda_o <= 1'b0; sda_t_z <= 1'b0;
+                    sda_out <= 1'b0; sda_z <= 1'b0;
                 end
             end
             STATE_ACK1:
@@ -215,7 +215,7 @@ begin
                 begin
                     next_state <= STATE_ADD2;
                     i2c_bit_counter <= 4'd0;
-                    sda_t_z <= 1'b1;
+                    sda_z <= 1'b1;
                 end
             end
             STATE_ADD2:
@@ -230,7 +230,7 @@ begin
                     begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                     end
-                    sda_o <= 1'b0; sda_t_z <= 1'b0;
+                    sda_out <= 1'b0; sda_z <= 1'b0;
                 end
             end
             STATE_ACK2:
@@ -239,14 +239,14 @@ begin
                 begin
                     next_state <= STATE_START_R;
                     i2c_bit_counter <= 4'd0;
-                    sda_t_z <= 1'b1;
+                    sda_z <= 1'b1;
                 end
                 if (i2c_write_en)
                 begin
                     next_state <= STATE_DATA_W;
                     sequential_write_counter <= sequential_write_counter + 8'd1;
                     i2c_bit_counter <= 4'd0;
-                    sda_t_z <= 1'b1;
+                    sda_z <= 1'b1;
                     i2c_clk_write_sync <= 1'b1;
                 end
             end
@@ -259,13 +259,13 @@ begin
                         next_state <= STATE_CONTROL_BYTE_R;
                         i2c_bit_counter <= 4'd0;
                         scl_enable <= 1'b1;
-                        sda_o <= 1'b0; sda_t_z <= 1'b0;
+                        sda_out <= 1'b0; sda_z <= 1'b0;
                     end
                     else
                     begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                         scl_enable <= 1'b0;
-                        sda_o <= 1'b1; sda_t_z <= 1'b0;
+                        sda_out <= 1'b1; sda_z <= 1'b0;
                     end
                 end
             end
@@ -281,7 +281,7 @@ begin
                     begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                     end
-                    sda_o <= CONTROL_BYTE_R[7 - i2c_bit_counter]; sda_t_z <= 1'b0;
+                    sda_out <= CONTROL_BYTE_R[7 - i2c_bit_counter]; sda_z <= 1'b0;
                 end
             end
             STATE_ACK3_L:
@@ -291,7 +291,7 @@ begin
                     next_state <= STATE_DATA_R;
                     sequential_read_counter <= sequential_read_counter + 8'd1;
                     i2c_bit_counter <= 4'd0;
-                    sda_o <= 1'b0; sda_t_z <= 1'b0;
+                    sda_out <= 1'b0; sda_z <= 1'b0;
                 end
             end
             STATE_DATA_R:
@@ -308,17 +308,17 @@ begin
                         i2c_bit_counter <= i2c_bit_counter + 4'd1;
                         i2c_clk_byte_en <= 1'b0;
                     end
-                    sda_t_z <= 1'b1;
+                    sda_z <= 1'b1;
                     
                     case (i2c_bit_counter)
-                        4'd0: i2c_clk_byte_out[7] <= sda_i;
-                        4'd1: i2c_clk_byte_out[6] <= sda_i;
-                        4'd2: i2c_clk_byte_out[5] <= sda_i;
-                        4'd3: i2c_clk_byte_out[4] <= sda_i;
-                        4'd4: i2c_clk_byte_out[3] <= sda_i;
-                        4'd5: i2c_clk_byte_out[2] <= sda_i;
-                        4'd6: i2c_clk_byte_out[1] <= sda_i;
-                        4'd7: i2c_clk_byte_out[0] <= sda_i;
+                        4'd0: i2c_clk_byte_out[7] <= sda_in;
+                        4'd1: i2c_clk_byte_out[6] <= sda_in;
+                        4'd2: i2c_clk_byte_out[5] <= sda_in;
+                        4'd3: i2c_clk_byte_out[4] <= sda_in;
+                        4'd4: i2c_clk_byte_out[3] <= sda_in;
+                        4'd5: i2c_clk_byte_out[2] <= sda_in;
+                        4'd6: i2c_clk_byte_out[1] <= sda_in;
+                        4'd7: i2c_clk_byte_out[0] <= sda_in;
                     default:;
                     endcase
                 end
@@ -329,7 +329,7 @@ begin
                 begin
                     i2c_bit_counter <= 4'd0;
                     next_state <= STATE_STOP;
-                    sda_o <= 1'b1; sda_t_z <= 1'b0;
+                    sda_out <= 1'b1; sda_z <= 1'b0;
                 end
             end
             STATE_DATA_W:
@@ -347,14 +347,14 @@ begin
                     end
                     
                     case (i2c_bit_counter)
-                        4'd0: begin sda_o <= i2c_byte_in[7]; sda_t_z <= 1'b0; end
-                        4'd1: begin sda_o <= i2c_byte_in[6]; sda_t_z <= 1'b0; end
-                        4'd2: begin sda_o <= i2c_byte_in[5]; sda_t_z <= 1'b0; end
-                        4'd3: begin sda_o <= i2c_byte_in[4]; sda_t_z <= 1'b0; end
-                        4'd4: begin sda_o <= i2c_byte_in[3]; sda_t_z <= 1'b0; end
-                        4'd5: begin sda_o <= i2c_byte_in[2]; sda_t_z <= 1'b0; end
-                        4'd6: begin sda_o <= i2c_byte_in[1]; sda_t_z <= 1'b0; end
-                        4'd7: begin sda_o <= i2c_byte_in[0]; sda_t_z <= 1'b0; end
+                        4'd0: begin sda_out <= i2c_byte_in[7]; sda_z <= 1'b0; end
+                        4'd1: begin sda_out <= i2c_byte_in[6]; sda_z <= 1'b0; end
+                        4'd2: begin sda_out <= i2c_byte_in[5]; sda_z <= 1'b0; end
+                        4'd3: begin sda_out <= i2c_byte_in[4]; sda_z <= 1'b0; end
+                        4'd4: begin sda_out <= i2c_byte_in[3]; sda_z <= 1'b0; end
+                        4'd5: begin sda_out <= i2c_byte_in[2]; sda_z <= 1'b0; end
+                        4'd6: begin sda_out <= i2c_byte_in[1]; sda_z <= 1'b0; end
+                        4'd7: begin sda_out <= i2c_byte_in[0]; sda_z <= 1'b0; end
                     default:;
                     endcase
                     i2c_clk_write_sync <= 1'b0;
@@ -366,7 +366,7 @@ begin
                 begin
                     next_state <= STATE_STOP;
                     i2c_bit_counter <= 4'd0;
-                    sda_o <= 1'bz; sda_t_z <= 1'b1;
+                    sda_out <= 1'bz; sda_z <= 1'b1;
                 end
             end
             STATE_STOP:
@@ -374,19 +374,19 @@ begin
                 if (i2c_bit_counter == 4'd1)
                 begin
                     next_state <= STATE_IDLE;
-                    sda_o <= 1'b1; sda_t_z <= 1'b0;
+                    sda_out <= 1'b1; sda_z <= 1'b0;
                 end
                 else
                 begin
                     i2c_bit_counter <= i2c_bit_counter + 4'd1;
                     scl_enable <= 1'b0;
-                    sda_o <= 1'b0; sda_t_z <= 1'b0;
+                    sda_out <= 1'b0; sda_z <= 1'b0;
                 end
             end
             default:
             begin
                 next_state <= STATE_IDLE;
-                sda_o <= 1'b1; sda_t_z <= 1'b0;
+                sda_out <= 1'b1; sda_z <= 1'b0;
             end
         endcase
     end
@@ -414,7 +414,7 @@ begin
     end
 end
 
-assign scl_t = i2c_clk_group[15];
+assign scl = i2c_clk_group[15];
 
 //=======================================================================
 // 1. when i2c_read_trigger1 received, read up ID from eeprom immediately.
