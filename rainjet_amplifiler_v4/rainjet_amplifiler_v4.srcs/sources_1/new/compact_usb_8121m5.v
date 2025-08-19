@@ -56,9 +56,13 @@ module compact_usb_8121m5 (
     input               uart_rxd,
     output              uart_txd,
 
-    //IIC
-    output              scl,
-    inout               sda,
+    //EEPROM
+    output              scl_eeprom,
+    inout               sda_eeprom,
+    
+    //ADS1110A0IDBVR
+    output              scl_ads1110,
+    inout               sda_ads1110,
     
     input               supply_key,
     output              supply_out,
@@ -827,10 +831,10 @@ uart_business uart_business_u0 (
     .uart_trig_data                 (uart_trig_data         )
 );
 
-wire                    sda_z;
-wire                    sda_out;
-assign sda = sda_z ? 1'bz : sda_out;
-wire                    sda_in = sda;
+wire                    sda_eeprom_z;
+wire                    sda_eeprom_out;
+assign sda_eeprom = sda_eeprom_z ? 1'bz : sda_eeprom_out;
+wire                    sda_eeprom_in = sda_eeprom;
 
 iic_eeprom #(
     .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          ),
@@ -842,10 +846,10 @@ iic_eeprom #(
     .i2c_write_trigger              (i2c_write_trigger      ),
     .i2c_write_sync                 (i2c_write_sync         ),
     .i2c_byte_in                    (i2c_byte_in            ),
-    .scl                            (scl                    ),
-    .sda_in                         (sda_in                 ),
-    .sda_out                        (sda_out                ),
-    .sda_z                          (sda_z                  ),
+    .scl                            (scl_eeprom             ),
+    .sda_in                         (sda_eeprom_in          ),
+    .sda_out                        (sda_eeprom_out         ),
+    .sda_z                          (sda_eeprom_z           ),
     .i2c_byte_out_en                (i2c_byte_out_en        ),
     .i2c_byte_out                   (i2c_byte_out           )
 );
@@ -857,6 +861,25 @@ supply_ctrl #(
     .supply_key                     (supply_key             ),
     .supply_out                     (supply_out             )
 );
+
+wire                    sda_ads1110_z;
+wire                    sda_ads1110_out;
+assign sda_ads1110 = sda_ads1110_z ? 1'bz : sda_ads1110_out;
+wire                    sda_ads1110_in = sda_ads1110;
+
+iic_ads1110 #(
+    .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          ),
+    .I2C_CLK_FREQ                   (I2C_CLK_FREQ           )
+    ) iic_ads1110_inst (
+    .clk                            (clk                    ),
+    .rst_n                          (rst_n                  ),
+    .sw0                            (sw0                    ),
+    .scl                            (scl_ads1110            ),
+    .sda_in                         (sda_ads1110_in         ),
+    .sda_out                        (sda_ads1110_out        ),
+    .sda_z                          (sda_ads1110_z          )
+);
+
 
 
 endmodule
