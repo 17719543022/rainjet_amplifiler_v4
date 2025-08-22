@@ -874,6 +874,7 @@ iic_ads1110 #(
     .clk                            (clk                    ),
     .rst_n                          (rst_n                  ),
     .sw0                            (sw0                    ),
+    .sw1                            (sw1                    ),
     .scl                            (scl_ads1110            ),
     .sda_in                         (sda_ads1110_in         ),
     .sda_out                        (sda_ads1110_out        ),
