@@ -38,7 +38,7 @@ else
     
 reg [31:0]              i2c_clk_divider;
 reg                     i2c_clk;
-reg [15:0]              i2c_clk_group;
+reg [127:0]             i2c_clk_group;
 reg                     i2c_clk_d;
 reg                     i2c_clk_read_trigger;
 reg                     i2c_clk_write_trigger;
@@ -73,8 +73,6 @@ localparam [ 7:0]       SLAVE_ADDRESS           = 7'b100_1000;
 reg [ 3:0]              i2c_bit_counter;
 reg                     i2c_clk_byte_en;
 reg                     i2c_clk_byte_en_d;
-reg [ 7:0]              sequential_write_counter;
-reg [ 7:0]              sequential_read_counter;
 
 reg                     scl_enable;
 reg                     scl_enable_d;
@@ -123,8 +121,6 @@ begin
     if (~rst_n)
     begin
         next_state <= STATE_IDLE;
-        sequential_write_counter <= 8'd0;
-        sequential_read_counter <= 8'd0;
         sda_out <= 1'b1; sda_z <= 1'b0;
         scl_enable <= 1'b0;
         i2c_bit_counter <= 4'd0;
@@ -138,8 +134,6 @@ begin
                 if (i2c_read_en | i2c_write_en)
                 begin
                     next_state <= STATE_START;
-                    sequential_write_counter <= 8'd0;
-                    sequential_read_counter <= 8'd0;
                     i2c_bit_counter <= 4'd0;
                     i2c_clk_byte_en <= 1'b0;
                 end
@@ -333,15 +327,15 @@ always @(posedge clk or negedge rst_n)
 begin
     if (~rst_n)
     begin
-        i2c_clk_group <= 16'd65535;
+        i2c_clk_group <= 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     end
     else
     begin
-        i2c_clk_group <= {i2c_clk_group[14:0], (scl_enable_d ? i2c_clk : 1'b1)};
+        i2c_clk_group <= {i2c_clk_group[126:0], (scl_enable_d ? i2c_clk : 1'b1)};
     end
 end
 
-assign scl = i2c_clk_group[15];
+assign scl = i2c_clk_group[127];
 
 always @(posedge clk)
 begin
