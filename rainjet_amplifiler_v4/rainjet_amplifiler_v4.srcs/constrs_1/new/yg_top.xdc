@@ -28,10 +28,23 @@ set_property PACKAGE_PIN V19 [get_ports scl_eeprom]
 set_property IOSTANDARD LVCMOS33 [get_ports sda_eeprom]
 set_property PACKAGE_PIN U17 [get_ports sda_eeprom]
 
-set_property IOSTANDARD LVCMOS33 [get_ports scl_ads1110]
-set_property PACKAGE_PIN F13 [get_ports scl_ads1110]
-set_property IOSTANDARD LVCMOS33 [get_ports sda_ads1110]
-set_property PACKAGE_PIN F14 [get_ports sda_ads1110]
+##################################################################################
+#################################   BATARRY   ####################################
+##################################################################################
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_scl]
+set_property PACKAGE_PIN F13 [get_ports batarry_scl]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_sda]
+set_property PACKAGE_PIN F14 [get_ports batarry_sda]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_led_blue]
+set_property PACKAGE_PIN K19 [get_ports batarry_led_blue]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_led_green]
+set_property PACKAGE_PIN L18 [get_ports batarry_led_green]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_led_red]
+set_property PACKAGE_PIN L19 [get_ports batarry_led_red]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_sta1]
+set_property PACKAGE_PIN E14 [get_ports batarry_sta1]
+set_property IOSTANDARD LVCMOS33 [get_ports batarry_sta2]
+set_property PACKAGE_PIN E13 [get_ports batarry_sta2]
 
 ##################################################################################
 ################################ USB68013 INF ####################################

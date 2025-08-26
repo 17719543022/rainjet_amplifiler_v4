@@ -60,9 +60,14 @@ module compact_usb_8121m5 (
     output              scl_eeprom,
     inout               sda_eeprom,
     
-    //ADS1110A0IDBVR
-    output              scl_ads1110,
-    inout               sda_ads1110,
+    //BATARRY
+    output              batarry_scl,
+    inout               batarry_sda,
+    input               batarry_sta1,
+    input               batarry_sta2,
+    output              batarry_led_red,
+    output              batarry_led_green,
+    output              batarry_led_blue,
     
     input               supply_key,
     output              supply_out,
@@ -340,6 +345,7 @@ rst_ctrl rst_ctrl (
 );
 
 reg  [31:0]     led_switch_counter;
+reg             i2c_read_trigger;
 
 always @(posedge clk or negedge rst_n)
 begin
@@ -365,10 +371,23 @@ begin
         led <= led;
 end
 
+always @(posedge clk)
+begin
+    if (~rst_n)
+        i2c_read_trigger <= 1'b0;
+    else if ((led_switch_counter == MAIN_CLK_FREQ / 2 - 1) | (led_switch_counter == MAIN_CLK_FREQ - 1))
+        i2c_read_trigger <= 1'b1;
+    else
+        i2c_read_trigger <= 1'b0;
+end
+
 wire [15:0]             USB_DATA_OUT;
 wire [15:0]             USB_DATA_IN;
 wire                    i2c_byte_out_en;
 wire [ 7:0]             i2c_byte_out;
+
+wire [15:0]             batarry_protocol_volt;
+wire [15:0]             batarry_protocol_stat;
 
 usb_68013_ctrl usb_68013_ctrl (
     .clk                            (clk                    ),
@@ -399,6 +418,7 @@ usb_68013_ctrl usb_68013_ctrl (
     .adc_initiate_complete          (adc_initiate_complete  ),
     .i2c_byte_out_en                (i2c_byte_out_en        ),
     .i2c_byte_out                   (i2c_byte_out           ),
+    .batarry_protocol               ({batarry_protocol_stat, batarry_protocol_volt}),
     .fifo_2_usb_empty               (fifo_2_usb_empty       ),
     .USB_WR_DATA_ADC                (fifo_2_usb_q           ),
     .fifo_2_usb_usedw               (fifo_2_usb_usedw       ),
@@ -854,31 +874,32 @@ iic_eeprom #(
     .i2c_byte_out                   (i2c_byte_out           )
 );
 
-supply_ctrl #(
-    .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          )
-    ) supply_ctrl_inst (
-    .clk                            (clk                    ),
-    .supply_key                     (supply_key             ),
-    .supply_out                     (supply_out             )
-);
+wire                    batarry_sda_z;
+wire                    batarry_sda_out;
+assign batarry_sda = batarry_sda_z ? 1'bz : batarry_sda_out;
+wire                    batarry_sda_in = batarry_sda;
 
-wire                    sda_ads1110_z;
-wire                    sda_ads1110_out;
-assign sda_ads1110 = sda_ads1110_z ? 1'bz : sda_ads1110_out;
-wire                    sda_ads1110_in = sda_ads1110;
-
-iic_ads1110 #(
+batarry_ctrl #(
     .MAIN_CLK_FREQ                  (MAIN_CLK_FREQ          ),
     .I2C_CLK_FREQ                   (I2C_CLK_FREQ           )
-    ) iic_ads1110_inst (
+    ) batarry_ctrl_inst (
     .clk                            (clk                    ),
     .rst_n                          (rst_n                  ),
-    .sw0                            (sw0                    ),
-    .sw1                            (sw1                    ),
-    .scl                            (scl_ads1110            ),
-    .sda_in                         (sda_ads1110_in         ),
-    .sda_out                        (sda_ads1110_out        ),
-    .sda_z                          (sda_ads1110_z          )
+    .supply_key                     (supply_key             ),
+    .i2c_read_trigger               (i2c_read_trigger       ),
+    .i2c_write_trigger              (1'b0                   ),
+    .supply_out                     (supply_out             ),
+    .scl                            (batarry_scl            ),
+    .sda_in                         (batarry_sda_in         ),
+    .sda_out                        (batarry_sda_out        ),
+    .sda_z                          (batarry_sda_z          ),
+    .batarry_protocol_volt          (batarry_protocol_volt  ),
+    .batarry_sta1                   (batarry_sta1           ),
+    .batarry_sta2                   (batarry_sta2           ),
+    .batarry_led_red                (batarry_led_red        ),
+    .batarry_led_green              (batarry_led_green      ),
+    .batarry_led_blue               (batarry_led_blue       ),
+    .batarry_protocol_stat          (batarry_protocol_stat  )
 );
 
 

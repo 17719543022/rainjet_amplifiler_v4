@@ -18,7 +18,7 @@ module iic_eeprom #(
 
 reg [31:0]              i2c_clk_divider;
 reg                     i2c_clk;
-reg [127:0]             i2c_clk_group;
+reg [15:0]              i2c_clk_group;
 reg                     i2c_clk_d;
 reg                     i2c_clk_byte_en;
 reg                     i2c_clk_byte_en_d;
@@ -406,15 +406,15 @@ always @(posedge clk or negedge rst_n)
 begin
     if (~rst_n)
     begin
-        i2c_clk_group <= 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+        i2c_clk_group <= 16'hFF;
     end
     else
     begin
-        i2c_clk_group <= {i2c_clk_group[126:0], (scl_enable_d ? i2c_clk : 1'b1)};
+        i2c_clk_group <= {i2c_clk_group[14:0], (scl_enable_d ? i2c_clk : 1'b1)};
     end
 end
 
-assign scl = i2c_clk_group[127];
+assign scl = i2c_clk_group[15];
 
 //=======================================================================
 // 1. when i2c_read_trigger1 received, read up ID from eeprom immediately.

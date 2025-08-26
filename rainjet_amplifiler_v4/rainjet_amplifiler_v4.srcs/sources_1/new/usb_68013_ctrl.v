@@ -27,6 +27,7 @@ module usb_68013_ctrl (
     input                   adc_initiate_complete,
     input                   i2c_byte_out_en,
     input [ 7:0]            i2c_byte_out,
+    input [31:0]            batarry_protocol,
     input [31:0]            USB_WR_DATA_ADC,
     input                   fifo_2_usb_empty,
     input [15:0]            fifo_2_usb_usedw,
@@ -455,7 +456,7 @@ begin
     10'd508: USB_DATA_OUT_CMD <= {16'h0000}; // Serial Number
     10'd507: USB_DATA_OUT_CMD <= {i2c_byte_out_ascii[10], i2c_byte_out_ascii[11], i2c_byte_out_ascii[8], i2c_byte_out_ascii[9]};
     10'd506: USB_DATA_OUT_CMD <= {16'h2520}; // Version
-    10'd505: USB_DATA_OUT_CMD <= {16'h0704};
+    10'd505: USB_DATA_OUT_CMD <= {16'h2608};
     10'd504: USB_DATA_OUT_CMD <= {16'h0000}; // Channel
     10'd503: USB_DATA_OUT_CMD <= {16'h2400};
     10'd502: USB_DATA_OUT_CMD <= {adc_sample_period_32[23:16], adc_sample_period_32[31:24]}; // lADFreq
@@ -464,8 +465,8 @@ begin
     10'd499: USB_DATA_OUT_CMD <= {adc_sample_period[7:0], adc_sample_period[15:8]}; // 48M/lADFreq
     10'd498: USB_DATA_OUT_CMD <= {adc_trigger_length[23:16], adc_trigger_length[31:24]}; // TriggerLength
     10'd497: USB_DATA_OUT_CMD <= {adc_trigger_length[7:0], adc_trigger_length[15:8]};
-    10'd496: USB_DATA_OUT_CMD <= {16'hAA55};
-    10'd495: USB_DATA_OUT_CMD <= {16'h00ff};
+    10'd496: USB_DATA_OUT_CMD <= {batarry_protocol[23:16], batarry_protocol[31:24]}; // batarry_cells & batarry_state
+    10'd495: USB_DATA_OUT_CMD <= {batarry_protocol[7:0], batarry_protocol[15:8]}; // batarry_protocol_volt
     10'd494: USB_DATA_OUT_CMD <= {16'h0000}; // MaxFreq
     10'd493: USB_DATA_OUT_CMD <= {16'h1027};
     10'd492: USB_DATA_OUT_CMD <= {16'hAA55};
