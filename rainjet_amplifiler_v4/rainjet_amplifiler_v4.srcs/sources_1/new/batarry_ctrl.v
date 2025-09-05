@@ -636,7 +636,7 @@ begin
     else if ((batarry_sta1 == 1'b1) & (batarry_sta2 == 1'b0))
     begin
         batarry_led_red <= 1'bz;
-        batarry_led_green <= 1'b0;
+        batarry_led_green <= 1'b1;
         batarry_led_blue <= 1'bz;
     end
     else if (batarry_protocol_volt < 16'd9018)
