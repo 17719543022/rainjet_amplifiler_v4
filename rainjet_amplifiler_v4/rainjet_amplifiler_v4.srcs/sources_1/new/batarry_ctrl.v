@@ -529,15 +529,15 @@ reg                     cnt_1s_en;
 always @(posedge clk)
 begin
     if (~rst_n)
-        batarry_state <= 2'b11;
-    else if ((batarry_sta1 == 1'b0) & (batarry_sta2 == 1'b1))
-        batarry_state <= 2'b01;
-    else if ((batarry_sta1 == 1'b1) & (batarry_sta2 == 1'b0))
-        batarry_state <= 2'b10;
-    else if (batarry_protocol_volt < 16'd9018)
         batarry_state <= 2'b00;
-    else
+    else if ((batarry_sta1 == 1'b0) & (batarry_sta2 == 1'b1))
+        batarry_state <= 2'b10;
+    else if ((batarry_sta1 == 1'b1) & (batarry_sta2 == 1'b0))
+        batarry_state <= 2'b01;
+    else if (batarry_protocol_volt < 16'd9018)
         batarry_state <= 2'b11;
+    else
+        batarry_state <= 2'b00;
 end
 
 always @(posedge clk)
