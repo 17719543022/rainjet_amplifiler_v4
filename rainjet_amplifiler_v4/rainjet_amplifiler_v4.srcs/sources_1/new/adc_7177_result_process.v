@@ -2,6 +2,7 @@
 module adc_7177_result_process(
     input               clk,
     input               rst_n,
+    input  [ 7:0]       ad7177_switch_dl_total,
 
     input               read_trigger,
     input               read_period,
@@ -15,6 +16,9 @@ module adc_7177_result_process(
 
     output              result_write_trigger
 );
+
+parameter           TOTAL_DL_NUM_18 = 18;
+parameter           TOTAL_DL_NUM_36 = 36;
 
 reg    [31:0]       adc_result_shift_reg;
 reg    [27:0]       adc_result_ch0_org,    adc_result_ch1_org,    adc_result_ch2_org,    adc_result_ch3_org;
@@ -41,10 +45,6 @@ else if (read_period & (spi_state_cnt[4:0] == 'd13))
 always @(posedge clk)
 if (spi_state_cnt == 'd10)
     case (adc_result_shift_reg[1:0])
-    //2'd0: adc_result_ch0 <= adc_result_shift_reg[31:4];
-    //2'd1: adc_result_ch1 <= adc_result_shift_reg[31:4];
-    //2'd2: adc_result_ch2 <= adc_result_shift_reg[31:4];
-    //2'd3: adc_result_ch3 <= adc_result_shift_reg[31:4];
     2'd0: adc_result_ch0_org <= adc_result_shift_reg[31:4];
     2'd1: adc_result_ch1_org <= adc_result_shift_reg[31:4];
     2'd2: adc_result_ch2_org <= adc_result_shift_reg[31:4];
@@ -81,40 +81,17 @@ begin
     adc_result_ch3_sum <= adc_result_ch3_org_d3 + adc_result_ch3_org_d2 + adc_result_ch3_org_d1 + adc_result_ch3_org;
 end
 
-//2020.8.16通道1,2的对应关系对调。
-//assign adc_result_ch0 = adc_result_ch0_sum[29:2];
-//assign adc_result_ch1 = adc_result_ch1_sum[29:2];
-
-//20220814之前的状态
 assign adc_result_ch0 = adc_result_ch0_sum[29:2];
 assign adc_result_ch1 = adc_result_ch1_sum[29:2];
 assign adc_result_ch2 = adc_result_ch2_sum[29:2];
 assign adc_result_ch3 = adc_result_ch3_sum[29:2];
 
-//2022年8月14日，应李工要求，将输出调整为之前的5倍
-//assign adc_result_ch0 = adc_result_ch1_sum[29:0]; // + adc_result_ch1_sum[29:2];
-//assign adc_result_ch1 = adc_result_ch0_sum[29:0]; // + adc_result_ch0_sum[29:2];
-//assign adc_result_ch2 = adc_result_ch2_sum[29:0]; // + adc_result_ch2_sum[29:2];
-//assign adc_result_ch3 = adc_result_ch3_sum[29:0]; // + adc_result_ch3_sum[29:2];
-
-//assign adc_result_ch0 = {adc_result_ch1_sum[29:2],1'b0}; 
-//assign adc_result_ch1 = {adc_result_ch0_sum[29:2],1'b0}; 
-//assign adc_result_ch2 = {adc_result_ch2_sum[29:2],1'b0}; 
-//assign adc_result_ch3 = {adc_result_ch3_sum[29:2],1'b0}; 
-
-//2022年12月21号，增加8倍
-//assign adc_result_ch0 = adc_result_ch1_sum[29:0];
-//assign adc_result_ch1 = adc_result_ch0_sum[29:0];
-//assign adc_result_ch2 = adc_result_ch2_sum[29:0];
-//assign adc_result_ch3 = adc_result_ch3_sum[29:0];
-
-//分离版本，每片ADC处理2个通道
-assign result_write_trigger = (spi_state_cnt == 'd7) & (adc_result_shift_reg[1:0] == 2'd1);
+//assign result_write_trigger = (spi_state_cnt == 'd7) & (adc_result_shift_reg[1:0] == 2'd1);
 //assign result_write_trigger = (spi_state_cnt == 'd7) & (adc_result_shift_reg[1:0] == 2'd3);
-
+assign result_write_trigger = (ad7177_switch_dl_total == TOTAL_DL_NUM_18) ? (spi_state_cnt == 'd7) : ((spi_state_cnt == 'd7) & (adc_result_shift_reg[1:0] == 2'd1));
 
 
 
 
 endmodule
- 
+

@@ -3,7 +3,7 @@ module rst_ctrl(
     input                   rst_i,
     input                   isp_rst,
     output reg              power_up_rst,
-    output reg              rst_o  // low active
+    output reg              rst_o // low active
 );
 
 parameter               POWER_ON_RST_CNT = 10000000;

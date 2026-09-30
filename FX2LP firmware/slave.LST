@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 1   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SLAVE
@@ -62,7 +62,7 @@ line level    source
   53          // sbit PB7 = IOB ^ 7;
   54          
   55          // EZUSB FX2 PORTD = FD[15:8], when IFCFG[1:0]=11 and WORDWIDE=1
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 2   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 2   
 
   56          //sbit PD0 = IOD ^ 0;
   57          //sbit PD1 = IOD ^ 1;
@@ -126,7 +126,7 @@ line level    source
  115   1        // Note: The pre-REVE EPxGPIFTCH/L register are affected, as well...
  116   1        //      ...these have been replaced by GPIFTC[B3:B0] registers
  117   1      
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 3   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 3   
 
  118   1        // EP4 and EP8 are not used in this implementation...
  119   1                         
@@ -190,7 +190,7 @@ line level    source
  177   1      }
  178          
  179          void TD_Poll( void )
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 4   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 4   
 
  180          { // Called repeatedly while the device is idle
  181   1      
@@ -254,7 +254,7 @@ line level    source
  239   2          EP8AUTOINLENL = 0x40;
  240   2        }
  241   1            
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 5   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 5   
 
  242   1        Configuration = SETUPDAT[ 2 ];
  243   1        return( TRUE );        // Handled by user code
@@ -318,7 +318,7 @@ line level    source
  301          // Setup Token Interrupt Handler
  302          void ISR_Sutok( void ) interrupt 0
  303          {
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 6   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 6   
 
  304   1         EZUSB_IRQ_CLEAR( );
  305   1         USBIRQ = bmSUTOK;      // Clear SUTOK IRQ
@@ -382,7 +382,7 @@ line level    source
  363          void ISR_Ep0out( void ) interrupt 0
  364          {
  365   1      }
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 7   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 7   
 
  366          void ISR_Ep1in( void ) interrupt 0
  367          {
@@ -446,7 +446,7 @@ line level    source
  425   1      }
  426          void ISR_Ep6pflag( void ) interrupt 0
  427          {
-C51 COMPILER V9.60.0.0   SLAVE                                                             02/13/2025 15:44:11 PAGE 8   
+C51 COMPILER V9.60.0.0   SLAVE                                                             09/30/2026 13:51:13 PAGE 8   
 
  428   1      }
  429          void ISR_Ep8pflag( void ) interrupt 0

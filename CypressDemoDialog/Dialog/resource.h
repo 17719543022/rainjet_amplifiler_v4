@@ -20,6 +20,7 @@
 #define IDC_BUTTON1                     1007
 #define IDC_BUTTON_OUT                  1007
 #define IDC_BUTTON_VERSION              1007
+#define IDC_BUTTON_STATUS               1007
 #define IDC_BUTTON2                     1008
 #define IDC_BUTTON_IN                   1008
 #define IDC_BUTTON_ADC_SAMPLE           1008
@@ -29,6 +30,8 @@
 #define IDC_STATIC_AMP                  1012
 #define IDC_BUTTON3                     1013
 #define IDC_BUTTON_IMPEDANCE            1013
+#define IDC_BUTTON_RECONNECT            1013
+#define IDC_BUTTON_RECONNECT_USB        1013
 #define IDC_EDIT3                       1014
 #define IDC_EDIT_IMPEDANCE              1014
 #define IDC_BUTTON4                     1015
@@ -37,6 +40,7 @@
 #define IDC_EDIT_SAMPLE_FREQ            1016
 #define IDC_BUTTON6                     1018
 #define IDC_BUTTON_DL_NUM               1018
+#define IDC_BUTTON_TOTAL_DL_NUM         1018
 #define IDC_BUTTON7                     1019
 #define IDC_BUTTON_SAMPLE_FREQ          1019
 #define IDC_BUTTON8                     1020
@@ -51,13 +55,18 @@
 #define IDC_BUTTON_MIN_INC              1026
 #define IDC_BUTTON_MIN_DEC              1027
 #define IDC_STATIC_UART                 1028
-#define IDC_SendEdit                    1030
+#define IDC_EDIT_PRODUCT_ID             1030
 #define IDC_BUTTON11                    1031
 #define IDC_BUTTON_SEND                 1031
 #define IDC_COMBO_PORT_Nr               1033
 #define IDC_BUTTON_UART_TRIG            1034
 #define IDC_EDIT5                       1035
 #define IDC_EDIT_UART_TRIG              1035
+#define IDC_CHECK_TOTAL_DL_NUM          1036
+#define IDC_CHECK_18_DL_NUM             1036
+#define IDC_CHECK_IMPEDANCE             1037
+#define IDC_EDIT6                       1038
+#define IDC_EDIT_ANALYSIS               1038
 
 // Next default values for new objects
 // 
@@ -65,7 +74,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
