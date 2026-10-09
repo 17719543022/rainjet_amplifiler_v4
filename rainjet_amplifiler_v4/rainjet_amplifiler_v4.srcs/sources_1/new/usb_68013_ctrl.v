@@ -30,6 +30,7 @@ module usb_68013_ctrl (
     input                   i2c_byte_out_en,
     input [ 7:0]            i2c_byte_out,
     input [31:0]            batarry_protocol,
+    output reg              usb_repeater_supply,
     input [31:0]            USB_WR_DATA_ADC,
     input                   fifo_2_usb_empty,
     input [15:0]            fifo_2_usb_usedw,
@@ -481,8 +482,8 @@ begin
     10'd509: USB_DATA_OUT_CMD <= {i2c_byte_out_ascii[7], i2c_byte_out_ascii[7], i2c_byte_out_ascii[4], i2c_byte_out_ascii[5]};
     10'd508: USB_DATA_OUT_CMD <= {16'h0000}; // Serial Number
     10'd507: USB_DATA_OUT_CMD <= {i2c_byte_out_ascii[10], i2c_byte_out_ascii[11], i2c_byte_out_ascii[8], i2c_byte_out_ascii[9]};
-    10'd506: USB_DATA_OUT_CMD <= {16'h2520}; // Version
-    10'd505: USB_DATA_OUT_CMD <= {16'h1709};
+    10'd506: USB_DATA_OUT_CMD <= {16'h2620}; // Version
+    10'd505: USB_DATA_OUT_CMD <= {16'h0810};
     10'd504: USB_DATA_OUT_CMD <= {16'h0000}; // Channel
     10'd503: USB_DATA_OUT_CMD <= {adc_switch_dl_rsp_num, 8'h00};
     10'd502: USB_DATA_OUT_CMD <= {adc_sample_period_32[23:16], adc_sample_period_32[31:24]}; // lADFreq
@@ -996,6 +997,59 @@ end
 
 always@(posedge clk)  
     usb_trigger_value_valid <= usb_wren & (usb_wr_address == 'd3);
+
+
+
+
+
+reg   [15:0]        URS_clk_counter;
+reg   [11:0]        URS_ms_heartbeat_counter;
+reg   [ 9:0]        URS_ms_supply_counter;
+reg                 usb_repeater_supply_i;
+
+always@(posedge clk)
+if (~rst_n)
+    URS_clk_counter <= 'd0;
+else if (URS_clk_counter == 16'd47999)
+    URS_clk_counter <= 'd0;
+else
+    URS_clk_counter <= URS_clk_counter + 16'd1;
+
+always@(posedge clk)
+if (~rst_n)
+    URS_ms_heartbeat_counter <= 'd0;
+else if (adc_sample_en_usb == 'b1)
+    begin
+        if (pc_cmd_stop == 'b1)
+            URS_ms_heartbeat_counter <= 'd0;
+        else if ((URS_clk_counter == 16'd47999) & (URS_ms_heartbeat_counter < 12'd1000))
+            URS_ms_heartbeat_counter <= URS_ms_heartbeat_counter + 'd1;
+        else
+            URS_ms_heartbeat_counter <= URS_ms_heartbeat_counter;
+    end
+else
+    URS_ms_heartbeat_counter <= 'd0;
+
+always@(posedge clk)
+if (URS_clk_counter == 16'd47999)
+    begin
+        if (URS_ms_heartbeat_counter == 12'd1000)
+            URS_ms_supply_counter <= URS_ms_supply_counter + 'd1;
+        else
+            URS_ms_supply_counter <= 10'd1023;
+    end
+
+always@(posedge clk)
+if (~rst_n)
+    usb_repeater_supply_i <= 'b1;
+else if (URS_ms_supply_counter < 10'd512)
+    usb_repeater_supply_i <= 'b0;
+else
+    usb_repeater_supply_i <= 'b1;
+
+always@(posedge clk)
+    usb_repeater_supply <= usb_repeater_supply_i;
+
 
 
 

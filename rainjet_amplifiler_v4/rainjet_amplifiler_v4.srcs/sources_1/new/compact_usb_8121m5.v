@@ -71,6 +71,7 @@ module compact_usb_8121m5 (
     
     input               supply_key,
     output              supply_out,
+    output              usb_repeater_supply,
 
     output              jl_com1_cs_out,
     output              jl_com1_sck_out,
@@ -422,6 +423,7 @@ usb_68013_ctrl usb_68013_ctrl (
     .i2c_byte_out_en                (i2c_byte_out_en        ),
     .i2c_byte_out                   (i2c_byte_out           ),
     .batarry_protocol               ({batarry_protocol_stat, batarry_protocol_volt}),
+    .usb_repeater_supply            (usb_repeater_supply    ),
     .fifo_2_usb_empty               (fifo_2_usb_empty       ),
     .USB_WR_DATA_ADC                (fifo_2_usb_q           ),
     .fifo_2_usb_usedw               (fifo_2_usb_usedw       ),

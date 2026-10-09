@@ -195,6 +195,13 @@ namespace {
 		g_atParameter[0] = 0x30;
 	}
 
+	void BuildAtParameterHeartrate()
+	{
+		g_atParameterLength = 1;
+		memset(g_atParameter, 0, sizeof(g_atParameter));
+		g_atParameter[0] = 0x30;
+	}
+
 	void BuildAtParameterQuery()
 	{
 		g_atParameterLength = 1;
@@ -943,17 +950,22 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 	CDialogDlg* pThis = (CDialogDlg*)lParam;
 
 	CString strINData = pThis->m_strEndPointEnumerate0x86;
+	CString strOUTData = pThis->m_strEndPointEnumerate0x02;
 	TCHAR* pEnd;
 	BYTE inEpAddress = 0x0;
+	BYTE outEpAddress = 0x0;
 
 	// Extract the endpoint addresses........
 	strINData = strINData.Right(4);
+	strOUTData = strOUTData.Right(4);
 
 	//inEpAddress = (BYTE)wcstoul(strINData.GetBuffer(0), &pEnd, 16);
 	inEpAddress = strtol(strINData, &pEnd, 16);
+	outEpAddress = strtol(strOUTData, &pEnd, 16);
 	CCyUSBEndPoint* epBulkIn = pThis->m_selectedUSBDevice->EndPointOf(inEpAddress);
+	CCyUSBEndPoint* epBulkOut = pThis->m_selectedUSBDevice->EndPointOf(outEpAddress);
 
-	if (epBulkIn == NULL) return -1;
+	if (epBulkOut == NULL || epBulkIn == NULL) return -1;
 
 	//
 	// Get the max packet size (USB Frame Size).
@@ -961,9 +973,12 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 	// Transfer size is now multiple USB frames defined by PACKETS_PER_TRANSFER
 	//
 	UCHAR QUEUE_SIZE = 16;
-	//UCHAR PACKETS_PER_TRANSFER = 2;
-	long totalTransferSize = epBulkIn->MaxPktSize * 2;
+	UCHAR PACKETS_PER_TRANSFER = 2;
+	long totalTransferSize = epBulkIn->MaxPktSize * PACKETS_PER_TRANSFER;
 	epBulkIn->SetXferSize(totalTransferSize);
+
+	long totalOutTransferSize = epBulkOut->MaxPktSize;
+	epBulkOut->SetXferSize(totalOutTransferSize);
 
 	PUCHAR* buffersInput = new PUCHAR[QUEUE_SIZE];
 	PUCHAR* contextsInput = new PUCHAR[QUEUE_SIZE];
@@ -977,6 +992,20 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 
 		memset(buffersInput[nCount], 0xEF, totalTransferSize);
 	}
+
+	OVERLAPPED  outOvLap;
+	UCHAR* bufferOutput = new UCHAR[totalOutTransferSize];
+	outOvLap.hEvent = CreateEvent(NULL, false, false, NULL);
+
+	BuildAtParameterHeartrate();
+	BuildAtInstruction('H');
+
+	for (int nCount = 0; nCount < g_atInstructionLength; nCount++)
+	{
+		bufferOutput[nCount] = g_atInstruction[nCount];
+	}
+
+	epBulkOut->TimeOut = TIMEOUT_PER_TRANSFER_MILLI_SEC;
 
 	// Queue-up the first batch of transfer requests
 	for (int nCount = 0; nCount < QUEUE_SIZE; nCount++)
@@ -1028,6 +1057,11 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 		//{
 		//	fp = fopen("../samples/data.txt", "w");
 		//}
+
+		if (epBulkOut->XferData(bufferOutput, totalOutTransferSize) == FALSE)
+		{
+			AfxMessageBox(CString("Heartbeat send fails."));
+		}
 
 		long readLength = totalTransferSize;
 
@@ -1159,6 +1193,8 @@ DWORD WINAPI CDialogDlg::PerformADCSampling(LPVOID lParam)
 	// Bail out......
 	delete[]contextsInput;
 	delete[] buffersInput;
+	delete[] bufferOutput;
+	CloseHandle(outOvLap.hEvent);
 
 	return 0;
 }

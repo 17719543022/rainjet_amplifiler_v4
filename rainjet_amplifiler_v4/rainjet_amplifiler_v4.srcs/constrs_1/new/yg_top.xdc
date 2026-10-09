@@ -232,11 +232,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports sw0]
 set_property IOSTANDARD LVCMOS33 [get_ports sw1]
 set_property IOSTANDARD LVCMOS33 [get_ports supply_key]
 set_property IOSTANDARD LVCMOS33 [get_ports supply_out]
+set_property IOSTANDARD LVCMOS33 [get_ports usb_repeater_supply]
 
 set_property PACKAGE_PIN AA6 [get_ports sw0]
 set_property PACKAGE_PIN AB5 [get_ports sw1]
 set_property PACKAGE_PIN K17 [get_ports supply_key]
 set_property PACKAGE_PIN N22 [get_ports supply_out]
+set_property PACKAGE_PIN F1 [get_ports usb_repeater_supply]
 
 
 ##################################################################################
