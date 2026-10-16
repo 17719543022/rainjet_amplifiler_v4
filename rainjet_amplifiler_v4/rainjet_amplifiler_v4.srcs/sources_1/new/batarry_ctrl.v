@@ -662,7 +662,13 @@ begin
     end
     else
     begin
-        if (led_blink_counter == MAIN_CLK_FREQ / 2 - 1)
+        if (supply_key_d == 1'b0)
+        begin
+            batarry_led_red <= 1'bz;
+            batarry_led_green <= 1'bz;
+            batarry_led_blue <= 1'b1;
+        end
+        else if (led_blink_counter == MAIN_CLK_FREQ / 2 - 1)
         begin
             batarry_led_red <= 1'bz;
             batarry_led_green <= 1'bz;

@@ -483,7 +483,7 @@ begin
     10'd508: USB_DATA_OUT_CMD <= {16'h0000}; // Serial Number
     10'd507: USB_DATA_OUT_CMD <= {i2c_byte_out_ascii[10], i2c_byte_out_ascii[11], i2c_byte_out_ascii[8], i2c_byte_out_ascii[9]};
     10'd506: USB_DATA_OUT_CMD <= {16'h2620}; // Version
-    10'd505: USB_DATA_OUT_CMD <= {16'h0810};
+    10'd505: USB_DATA_OUT_CMD <= {16'h1610};
     10'd504: USB_DATA_OUT_CMD <= {16'h0000}; // Channel
     10'd503: USB_DATA_OUT_CMD <= {adc_switch_dl_rsp_num, 8'h00};
     10'd502: USB_DATA_OUT_CMD <= {adc_sample_period_32[23:16], adc_sample_period_32[31:24]}; // lADFreq
